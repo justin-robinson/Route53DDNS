@@ -7,10 +7,12 @@ const handler = async () => {
     console.error('you must pass in exactly two args. name and hostedZoneId\nEx: npm run ddns *.example.com <HOSTED_ZONE_ID>')
     return;
   }
-  const name = args[0]
+  const names = args[0].split(',');
   const hostedZoneId = args[1];
   const ddns = new DDNS();
-  ddns.update(name, hostedZoneId, await publicIp.v4());
+  names.forEach(async (name) => {
+    ddns.update(name, hostedZoneId, await publicIp.v4());
+  });
 };
 
 handler();
