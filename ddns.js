@@ -13,24 +13,24 @@ export default class DDNS {
     this.history = new History(path.join(process.cwd(), 'history'));
   }
 
-  async update(name, hostedZoneId, ip) {
-    const lastIP = this.history.getLastIP(name, hostedZoneId);
+  async update(hostedZoneId, name, type, value) {
+    const lastValue = this.history.getLastRecordValue(hostedZoneId, name, type);
 
-    if (lastIP === ip) {
-      console.log('ip unchanged. doing nothing');
+    if (lastValue === value) {
+      console.log(`${hostedZoneId} ${name} ${type} ${value} unchanged. Doing nothing`);
       return;
     }
 
     try {
-      await this.doUpdate(name, hostedZoneId, ip);
-      this.history.setLastIP(name, hostedZoneId, ip);
-      console.log(`${name} set to ${ip}`);
+      await this.doUpdateRecord(hostedZoneId, name, type, value);
+      this.history.setLastRecordValue(hostedZoneId, name, type, value);
+      console.log(`${hostedZoneId} ${name} ${type} set to ${value}`);
     } catch (e) {
       console.error(e);
     }
   }
 
-  async doUpdate(name, hostedZoneId, ip) {
+  async doUpdateRecord(hostedZoneId, name, type, value) {
     const params = {
       ChangeBatch: {
         Changes: [
@@ -40,11 +40,11 @@ export default class DDNS {
               Name: name,
               ResourceRecords: [
                 {
-                  Value: ip
+                  Value: value
                 }
               ],
               TTL: 60,
-              Type: "A"
+              Type: type
             }
           }
         ],
@@ -53,6 +53,6 @@ export default class DDNS {
       HostedZoneId: hostedZoneId
     };
   
-    await route53.changeResourceRecordSets(params).promise();
+    return route53.changeResourceRecordSets(params).promise();
   }
 }

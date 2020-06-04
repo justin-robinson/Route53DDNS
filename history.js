@@ -9,16 +9,16 @@ export default class History {
     fs.mkdirSync(this.directory, {recursive: true});
   }
 
-  getLastIP(name, hostedZoneId) {
-    return this._readFile(this.getPath(name, hostedZoneId));
+  getLastRecordValue(hostedZoneId, name, type) {
+    return this._readFile(this.getPath(name, type, hostedZoneId));
   }
 
-  setLastIP(name, hostedZoneId, ip) {
-    fs.writeFileSync(this.getPath(name, hostedZoneId), ip);
+  setLastRecordValue(hostedZoneId, name, type, value) {
+    fs.writeFileSync(this.getPath(name, type, hostedZoneId), value);
   }
 
-  getPath(name, hostedZoneId) {
-    return path.join(this.directory, `${hostedZoneId}_${name}`);
+  getPath(hostedZoneId, name, type) {
+    return path.join(this.directory, [hostedZoneId, name, type].join('_'));
   }
 
   _readFile(path) {
